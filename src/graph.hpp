@@ -22,6 +22,8 @@ namespace graph {
 
         void generateRandomGraph(int m, int t);
 
-        void dijkstra(uint64_t src, uint64_t dst);
+        uint64_t dijkstra(uint64_t src, uint64_t dst);
+
+        void printGraph();
     };
 }  // namespace graph

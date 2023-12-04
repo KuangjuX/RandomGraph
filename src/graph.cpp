@@ -1,7 +1,9 @@
 #include "graph.hpp"
 #include "gnode.hpp"
+#include <queue>
 #include <algorithm>
 #include <iostream>
+#include <fmt/core.h>
 
 namespace graph {
     template <>
@@ -25,12 +27,11 @@ namespace graph {
 
     template <>
     void Graph<GNode>::buildRing(int m) {
-        std::vector<std::shared_ptr<GNode>> nodes;
         for (int i = 0; i < m; i++) {
-            nodes.push_back(std::make_shared<GNode>(i));
+            addNode(std::make_shared<GNode>());
         }
         for (int i = 0; i < m; i++) {
-            addNodeAndEdge(nodes[i], nodes[(i + 1) % m]);
+            addEdge(nodes_[i], nodes_[(i + 1) % m]);
         }
     }
 
@@ -46,13 +47,14 @@ namespace graph {
         for (auto num : nums) {
             sum += num;
         }
-        uint64_t rand = std::rand() % sum;
+        int64_t rand = std::rand() % sum;
         uint64_t index = 0;
         while (rand > 0) {
+            fmt::println("rand = {}, nums[{}] = {}", rand, index, nums[index]);
             rand -= nums[index];
             index++;
         }
-        return index;
+        return (int64_t)(index - 1) >= 0 ? (index - 1) : 0;
     }
 
     template <>
@@ -71,68 +73,80 @@ namespace graph {
                 // randomly has.
                 uint64_t index = selectNode();
                 // Make sure the selected node is not the new node.
-                while (index == node->getId()) {
+                while (index == node->getId() || node->existConnection(index)) {
                     index = selectNode();
                 }
+                // fmt::println("Select node {} to connect with node {}", index,
+                //              node->getId());
                 // Add an edge between the new node and the selected node.
                 addEdge(node, nodes_[index]);
             }
         }
     }
 
+    // Implement Dijkstra's algorithm to find the shortest path between two
+    // nodes and output the path trace.
     template <>
-    void Graph<GNode>::dijkstra(uint64_t src, uint64_t dst) {
-        // Initialize the distance of each node to infinity.
-        std::vector<uint64_t> distance(nodes_.size(),
-                                       std::numeric_limits<uint64_t>::max());
-        // Initialize the previous node of each node to itself.
-        std::vector<uint64_t> previous(nodes_.size(),
-                                       std::numeric_limits<uint64_t>::max());
-        // Initialize the set of visited nodes to empty.
-        std::vector<bool> visited(nodes_.size(), false);
-        // Set the distance of the source node to 0.
+    uint64_t Graph<GNode>::dijkstra(uint64_t src, uint64_t dst) {
+        std::priority_queue<std::pair<int, uint64_t>,
+                            std::vector<std::pair<int, uint64_t>>,
+                            std::greater<>>
+            pq;
+        std::vector<int> distance(nodes_.size(),
+                                  std::numeric_limits<int>::max());
+        std::vector<std::vector<uint64_t>> paths(nodes_.size());
+
+        // 初始化源节点
         distance[src] = 0;
-        // While the set of visited nodes is not equal to the set of all nodes.
-        while (std::find(visited.begin(), visited.end(), false) !=
-               visited.end()) {
-            // Select the unvisited node with the smallest distance.
-            uint64_t min = std::numeric_limits<uint64_t>::max();
-            uint64_t index = 0;
-            for (uint64_t i = 0; i < nodes_.size(); i++) {
-                if (!visited[i] && distance[i] < min) {
-                    min = distance[i];
-                    index = i;
+        paths[src].push_back(src);
+        pq.push(std::make_pair(0, src));
+
+        while (!pq.empty()) {
+            uint64_t currNode = pq.top().second;
+            pq.pop();
+
+            if (currNode == dst) {
+                break;  // 已找到目标节点，提前退出
+            }
+
+            int currDist = distance[currNode];
+
+            for (const auto& nextNode : nodes_[currNode]->next_) {
+                int edgeWeight = 1;  // 连通节点间距离为1
+                int newDist = currDist + edgeWeight;
+
+                if (newDist < distance[nextNode]) {
+                    distance[nextNode] = newDist;
+                    paths[nextNode] = paths[currNode];
+                    paths[nextNode].push_back(nextNode);
+                    pq.push(std::make_pair(newDist, nextNode));
                 }
             }
-            // Mark the selected node as visited.
-            visited[index] = true;
-            // For each unvisited neighbor of the selected node.
-            auto node = nodes_[index];
-            while (node != nullptr) {
-                if (!visited[node->getId()]) {
-                    // Calculate the distance from the source node to the
-                    // neighbor through the selected node.
-                    uint64_t new_distance = distance[index] + 1;
-                    // If the new distance is smaller than the current distance
-                    // of the neighbor.
-                    if (new_distance < distance[node->getId()]) {
-                        // Update the distance of the neighbor.
-                        distance[node->getId()] = new_distance;
-                        // Update the previous node of the neighbor.
-                        previous[node->getId()] = index;
-                    }
-                }
-                node = node->next_;
+        }
+
+        // 打印路径
+        std::cout << "Shortest path from Node " << src << " to Node " << dst
+                  << ":" << std::endl;
+        for (const auto& node : paths[dst]) {
+            std::cout << node << " -> ";
+        }
+
+        std::cout << "End " << std::endl;
+
+        // 打印距离
+        std::cout << "Distance from Node " << src << " to Node " << dst << ": "
+                  << distance[dst] << std::endl;
+        return distance[dst];
+    }
+
+    template <>
+    void Graph<GNode>::printGraph() {
+        for (auto node : nodes_) {
+            fmt::print("Node {} connects to: ", node->getId());
+            for (auto next : node->next_) {
+                fmt::print("{} ", next);
             }
+            fmt::print("\n");
         }
-        // Print the shortest path from the source node to the destination node.
-        std::cout << "The shortest path from " << src << " to " << dst
-                  << " is: ";
-        uint64_t node = dst;
-        while (node != src) {
-            std::cout << node << " <- ";
-            node = previous[node];
-        }
-        std::cout << src << std::endl;
     }
 }  // namespace graph

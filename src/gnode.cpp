@@ -1,25 +1,25 @@
 #include "gnode.hpp"
+#include <iostream>
 
 namespace graph {
     uint64_t GNode::next_id_ = 0;
 
     void GNode::connectNode(std::shared_ptr<GNode> node) {
-        while (next_ != nullptr) {
-            next_ = next_->next_;
-        }
-        next_ = node;
+        // next_.push_back(node->id_);
+        // node->next_.push_back(id_);
+        next_.insert(node->id_);
+        node->next_.insert(id_);
     }
 
-    void GNode::addNext(std::shared_ptr<GNode> next) { next_ = next; }
+    uint64_t GNode::getEdgeNums() { return next_.size(); }
 
-    uint64_t GNode::getEdgeNums() {
-        uint64_t nums = 0;
-        auto node = next_;
-        while (node != nullptr) {
-            nums++;
-            node = node->next_;
+    bool GNode::existConnection(uint64_t id) {
+        for (auto next : next_) {
+            if (next == id) {
+                return true;
+            }
         }
-        return nums;
+        return false;
     }
 
 }  // namespace graph
