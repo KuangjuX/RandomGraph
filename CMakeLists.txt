@@ -3,6 +3,25 @@ project(RandomGraph C CXX)
 
 option(BUILD_TEST "Build test code" ON)
 
+# 添加选项
+option(ENABLE_DEBUG "启用调试模式" OFF)
+
+# 根据选项设置宏定义
+if(ENABLE_DEBUG)
+    add_compile_definitions(DEBUG)
+    message(STATUS "Enable debug mode")
+else()
+    message(STATUS "Disable debug mode")
+endif()
+
+if(ENABLE_ACC)
+    add_compile_definitions(ACC)
+    message(STATUS "Enable acc mode")
+else()
+    message(STATUS "Disable acc mode")
+endif()
+
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

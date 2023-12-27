@@ -50,7 +50,9 @@ namespace graph {
         int64_t rand = std::rand() % sum;
         uint64_t index = 0;
         while (rand > 0) {
+#ifdef DEBUG
             fmt::println("rand = {}, nums[{}] = {}", rand, index, nums[index]);
+#endif
             rand -= nums[index];
             index++;
         }
@@ -76,8 +78,10 @@ namespace graph {
                 while (index == node->getId() || node->existConnection(index)) {
                     index = selectNode();
                 }
-                // fmt::println("Select node {} to connect with node {}", index,
-                //              node->getId());
+#ifdef DEBUG
+                fmt::println("Select node {} to connect with node {}", index,
+                             node->getId());
+#endif
                 // Add an edge between the new node and the selected node.
                 addEdge(node, nodes_[index]);
             }
@@ -124,7 +128,8 @@ namespace graph {
             }
         }
 
-        // 打印路径
+// 打印路径
+#ifdef DEBUG
         std::cout << "Shortest path from Node " << src << " to Node " << dst
                   << ":" << std::endl;
         for (const auto& node : paths[dst]) {
@@ -136,6 +141,7 @@ namespace graph {
         // 打印距离
         std::cout << "Distance from Node " << src << " to Node " << dst << ": "
                   << distance[dst] << std::endl;
+#endif
         return distance[dst];
     }
 
