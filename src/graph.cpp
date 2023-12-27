@@ -3,6 +3,7 @@
 #include <queue>
 #include <algorithm>
 #include <iostream>
+#include <assert.h>
 #include <fmt/core.h>
 
 namespace graph {
@@ -92,10 +93,13 @@ namespace graph {
     // nodes and output the path trace.
     template <>
     uint64_t Graph<GNode>::dijkstra(uint64_t src, uint64_t dst) {
+        assert(src < nodes_.size());
+        assert(dst < nodes_.size());
         std::priority_queue<std::pair<int, uint64_t>,
                             std::vector<std::pair<int, uint64_t>>,
                             std::greater<>>
             pq;
+
         std::vector<int> distance(nodes_.size(),
                                   std::numeric_limits<int>::max());
         std::vector<std::vector<uint64_t>> paths(nodes_.size());

@@ -11,10 +11,10 @@ MACRO_FLAGS := -DFMTLOG_HEADER_ONLY -DFMT_HEADER_ONLY
 COMMAND_ARGS ?=
 
 T0 ?= 1000
-ACC ?= Y
+DEBUG ?= N
 
-ifeq ($(ACC),Y)
-	COMMAND_ARGS += ENABLE_ACC
+ifeq ($(DEBUG),Y)
+	COMMAND_ARGS += -DENABLE_DEBUG=ON
 endif
 
 .PHONY: build example clean test

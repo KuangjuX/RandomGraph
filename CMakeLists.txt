@@ -14,13 +14,6 @@ else()
     message(STATUS "Disable debug mode")
 endif()
 
-if(ENABLE_ACC)
-    add_compile_definitions(ACC)
-    message(STATUS "Enable acc mode")
-else()
-    message(STATUS "Disable acc mode")
-endif()
-
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
